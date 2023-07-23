@@ -1,0 +1,55 @@
+{
+    "lyric": "ka",
+    "phoneme": "k a",
+    "langID": 0,
+    "isProtected": true,
+    "pos": 480,
+    "duration": 480,
+    "number": 60,
+    "velocity": 64,
+    "exp": {
+        "accent": 50,
+        "decay": 50,
+        "bendDepth": 0,
+        "bendLength": 0,
+        "opening": 127
+    },
+    "aiExp": {
+        "pitchFine": 0.5,
+        "pitchDriftStart": 0.5,
+        "pitchDriftEnd": 0.5,
+        "pitchScalingCenter": 0.5,
+        "pitchScalingOrigin": 0.5,
+        "pitchTransitionStart": 0.5,
+        "pitchTransitionEnd": 0.5,
+        "amplitudeWhole": 0.5,
+        "amplitudeStart": 0.5,
+        "amplitudeEnd": 0.5,
+        "formantWhole": 0.5,
+        "formantStart": 0.5,
+        "formantEnd": 0.5
+    },
+    "singingSkill": {
+        "duration": 160,
+        "weight": {
+            "pre": 64,
+            "post": 64
+        }
+    },
+    "vibrato": {
+        "type": 0,
+        "duration": 320,
+        "depths": [
+            {
+                "pos": 0,
+                "value": 0
+            }
+        ],
+        "rates": [
+            {
+                "pos": 0,
+                "value": 50
+            }
+        ]
+    }
+}
