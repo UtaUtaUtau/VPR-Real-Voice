@@ -59,7 +59,7 @@ def get_label(fname, args):
     else:
         labf = input('Drag and drop label (Audacity .txt or HTK .lab): ').strip('"')
         _, ext = os.path.splitext(labf)
-        while ext not in ['.wav', '.lab']:
+        while ext not in ['.txt', '.lab']:
             labf = input('Drag and drop label (Audacity .txt or HTK .lab): ').strip('"')
             _, ext = os.path.splitext(labf)
         return labf, ext == '.lab'
