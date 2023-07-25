@@ -51,7 +51,7 @@ class LabelLine:
 
 def get_label(fname, args):
     if args.lab:
-        return args.lab
+        return args.lab, args.lab.endswith('.lab')
     if os.path.exists(fname + '.txt'):
         return fname + '.txt', False
     elif os.path.exists(fname + '.lab'):
