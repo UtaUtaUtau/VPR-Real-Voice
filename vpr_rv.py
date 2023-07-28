@@ -126,6 +126,20 @@ def remove_zeros(y):
     nonzeros = interp.interp1d(nonzero_x, nonzero_y, bounds_error=False, fill_value=(nonzero_y[0], nonzero_y[-1]))
     return nonzeros(x)
 
+def envelope(N, fade_length=30):
+    fade = np.linspace(0, 1, fade_length)
+    total_length = 2 * fade_length
+    res = []
+    if N > total_length:
+        res = np.hstack([fade, np.ones(N - total_length), fade[::-1]])
+    elif N == total_length:
+        res = np.hstack([fade, fade[::-1]])
+    elif N > 2:
+        n = N // 2
+        res = np.hstack([np.linspace(0, 1, n), np.linspace(1, 0, N - n)])
+    else:
+        res = np.ones(N)
+    return res * res * (3 - 2 * res)
 try:
     parser = ArgumentParser(description='idk man Real Voice but for V6.')
     parser.add_argument('wave', help='The sound file. Supported formats are anything soundfile supports.')
@@ -207,15 +221,16 @@ try:
     notes = vpr['tracks'][0]['parts'][0]['notes']
     controllers = vpr['tracks'][0]['parts'][0]['controllers']
 
-    # controllers.append({'name': 'dynamics', 'events': []})
     controllers.append({'name': 'pitchBendSens', 'events': []})
     controllers.append({'name': 'pitchBend', 'events': []})
+    controllers.append({'name': 'dynamics', 'events': []})
 
     vpr['tracks'][0]['volume']['events'] = []
-    dyn = vpr['tracks'][0]['volume']['events'] # controllers[0]['events']
     pbs = controllers[0]['events']
     pbn = controllers[1]['events']
+    dyn = controllers[2]['events'] # vpr['tracks'][0]['volume']['events']
 
+    log_dyn = 2 * np.log10(dyn_ticks)
     mean_note = 0
     tally = 0
     for l in lab:
@@ -250,16 +265,31 @@ try:
                     if pbn_note[i-1] != pbn_note[i]:
                         pbn.append({'pos': s+i, 'value': int(pbn_note[i])})
 
+            mean_dyn = np.mean(log_dyn[s:e])
+            note_dyn = log_dyn[s:e] - mean_dyn
+            max_dyn = np.max(np.abs(note_dyn))
+            if max_dyn > 1:
+                note_dyn /= max_dyn
+            note_dyn *= envelope(note_dyn.size)
+            note_dyn = 0.5 * note_dyn + 0.5
+            note_dyn = (128 * note_dyn).clip(0, 127).astype(np.int32)
+            for i in range(note_dyn.size):
+                if i == 0:
+                    dyn.append({'pos': s+i, 'value': int(note_dyn[i])})
+                else:
+                    if note_dyn[i-1] != note_dyn[i]:
+                        dyn.append({'pos': s+i, 'value': int(note_dyn[i])})
+
     mean_note = int(mean_note / tally)
     vpr['tracks'][0]['lastScrollPositionNoteNumber'] = mean_note
                         
-    voc_dyn = (200 * np.log10(dyn_ticks)).astype(np.int32)
-    for i in range(voc_dyn.size):
-        if i == 0:
-            dyn.append({'pos': i, 'value': int(voc_dyn[i])})
-        else:
-            if voc_dyn[i-1] != voc_dyn[i]:
-                dyn.append({'pos': i, 'value': int(voc_dyn[i])})
+##    voc_dyn = (200 * np.log10(dyn_ticks)).astype(np.int32)
+##    for i in range(voc_dyn.size):
+##        if i == 0:
+##            dyn.append({'pos': i, 'value': int(voc_dyn[i])})
+##        else:
+##            if voc_dyn[i-1] != voc_dyn[i]:
+##                dyn.append({'pos': i, 'value': int(voc_dyn[i])})
     
     logging.info('Compressing')
     if os.path.exists('output.vpr'):
